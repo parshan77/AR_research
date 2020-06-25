@@ -35,18 +35,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupPlane() {
-        arFragment.setOnTapArPlaneListener(new BaseArFragment.OnTapArPlaneListener() {
-            @Override
-            public void onTapPlane(HitResult hitResult, Plane plane, MotionEvent motionEvent) {
-                Anchor anchor = hitResult.createAnchor();
-                AnchorNode anchorNode = new AnchorNode(anchor);
-                anchorNode.setParent(arFragment.getArSceneView().getScene());
-                createModel(anchorNode);
-            }
+        Log.i(TAG, "setupPlane: called");
+        arFragment.setOnTapArPlaneListener((hitResult, plane, motionEvent) -> {
+            Log.i(TAG, "onTapPlane: user tapped at a point, adding model there ...");
+            Anchor anchor = hitResult.createAnchor();
+            AnchorNode anchorNode = new AnchorNode(anchor);
+            anchorNode.setParent(arFragment.getArSceneView().getScene());
+            addModelToScene(anchorNode);
         });
     }
 
-    private void createModel(AnchorNode anchorNode) {
+    private void addModelToScene(AnchorNode anchorNode) {
         TransformableNode transformableNode = new TransformableNode(arFragment.getTransformationSystem());
         transformableNode.setParent(anchorNode);
         transformableNode.setRenderable(this.modelRenderable);
@@ -55,13 +54,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void setupModel() {
+        Log.i(TAG, "setupModel");
         ModelRenderable.builder().setSource(this, R.raw.fox)
-                .build().thenAccept(new Consumer<ModelRenderable>() {
-            @Override
-            public void accept(ModelRenderable renderable) {
-                modelRenderable = renderable;
-            }
-        }).exceptionally(throwable -> {
+                .build().thenAccept(renderable -> modelRenderable = renderable).exceptionally(throwable -> {
             Log.e(TAG, "setupModel: model could not be loaded");
             Toast.makeText(getApplicationContext(), " Model could not be loaded", Toast.LENGTH_SHORT).show();
             return null;
